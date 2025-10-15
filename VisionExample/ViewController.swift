@@ -92,8 +92,8 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
       UIImagePickerController.isCameraDeviceAvailable(.front)
       || UIImagePickerController.isCameraDeviceAvailable(.rear)
     if isCameraAvailable {
-      // `CameraViewController` uses `AVCaptureDevice.DiscoverySession` which is only supported for
-      // iOS 10 or newer.
+// `CameraViewController` uses `AVCaptureDevice.DiscoverySession` which is only supported for
+// iOS 10 or newer.
       if #available(iOS 10.0, *) {
         videoCameraButton.isEnabled = true
       }
@@ -152,8 +152,8 @@ class ViewController: UIViewController, UINavigationControllerDelegate {
         detectBarcodes(image: imageView.image)
       case .detectImageLabelsOnDevice:
         detectLabels(image: imageView.image, shouldUseCustomModel: false)
-//      case .detectImageLabelsCustomOnDevice:
-//        detectLabels(image: imageView.image, shouldUseCustomModel: true)
+      case .detectImageLabelsCustomOnDevice:
+        detectLabels(image: imageView.image, shouldUseCustomModel: true)
       case .detectObjectsProminentNoClassifier, .detectObjectsProminentWithClassifier,
         .detectObjectsMultipleNoClassifier, .detectObjectsMultipleWithClassifier:
         let options = ObjectDetectorOptions()
@@ -995,7 +995,7 @@ extension ViewController {
           ofType: Constants.localModelFile.type
         )
       else {
-        self.resultsText = "On Device label detection failed because custom model was not found."
+        self.resultsText = "On Device カスタムモデルが見つからないため、画像ラベル検出に失敗しました！"
         self.showResults()
         return
       }
@@ -1025,7 +1025,7 @@ extension ViewController {
       guard error == nil, let labels = labels, !labels.isEmpty else {
         // [START_EXCLUDE]
         let errorString = error?.localizedDescription ?? Constants.detectionNoResultsMessage
-        strongSelf.resultsText = "On Device label detection failed with error: \(errorString)"
+        strongSelf.resultsText = "On Device 画像ラベル検出ができません！ \(errorString)"
         strongSelf.showResults()
         // [END_EXCLUDE]
         return
@@ -1201,7 +1201,7 @@ private enum DetectorPickerRow: Int {
     detectTextKoreanOnDevice,
     detectBarcodeOnDevice,
     detectImageLabelsOnDevice,
-//    detectImageLabelsCustomOnDevice,
+    detectImageLabelsCustomOnDevice,
     detectObjectsProminentNoClassifier,
     detectObjectsProminentWithClassifier,
     detectObjectsMultipleNoClassifier,
@@ -1215,8 +1215,8 @@ private enum DetectorPickerRow: Int {
     detectPoseAccurate,
     detectSegmentationMaskSelfie
 
-//static let rowsCount = 20
-  static let rowsCount = 18
+  static let rowsCount = 20
+  // static let rowsCount = 18
   static let componentsCount = 1
 
   public var description: String {
@@ -1237,8 +1237,8 @@ private enum DetectorPickerRow: Int {
             return "バーコードスキャン"
         case .detectImageLabelsOnDevice:
             return "画像認識"
-//      case .detectImageLabelsCustomOnDevice:
-//          return "画像認識(Custom)"
+        case .detectImageLabelsCustomOnDevice:
+            return "画像認識(Custom)"
         case .detectObjectsProminentNoClassifier:
             return "[ODT],single, no labeling"
         case .detectObjectsProminentWithClassifier:
@@ -1274,7 +1274,7 @@ private enum Constants {
     "japanese_sparse.png",
     "F002.png",
     "korean_sparse.png",
-    "barcode_128.png",
+    // "barcode_128.png",
     "qr_code.jpg",
     "ohtani3.jpg",
     "beach.jpg",
