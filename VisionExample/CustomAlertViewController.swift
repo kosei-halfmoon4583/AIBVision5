@@ -1,10 +1,10 @@
-//
+// --------------------------------------------------- //
 //  CustomAlertViewController.swift
 //  AIBVision5
 //
 //  Created by 綿貫直志 on 2025/10/12.
 //  Copyright © 2025 Google Inc. All rights reserved.
-//
+// --------------------------------------------------- //
 
 import UIKit
 
@@ -55,6 +55,8 @@ class CustomAlertViewController: UIViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        
+        // Debug codes -------------------------------------------------------------------------
         // print("🔵 viewDidAppear called")
         // print("🔵 actionsStackView subviews count: \(actionsStackView.arrangedSubviews.count)")
         
@@ -69,6 +71,7 @@ class CustomAlertViewController: UIViewController {
         // for (index, subview) in actionsStackView.arrangedSubviews.enumerated() {
         // print("📐 Button \(index) frame: \(subview.frame)")
         // }
+        // --------------------------------------------------------------------------------------
     }
     
     func addAction(title: String, style: UIAlertAction.Style = .default, isEnabled: Bool = true, handler: (() -> Void)?) {
@@ -133,17 +136,20 @@ class CustomAlertViewController: UIViewController {
             containerView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -40),
             
             // タイトル
-            titleLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 20),
+            // 2025.10.17, titleLabel.topAnchor.constraintを20から16へ変更
+            titleLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 16),
             titleLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
             titleLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
             
             // メッセージ
-            messageLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
+            // 2025.10.17, messageLabel.topAnchor.constraintを8から6へ変更
+            messageLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 6),
             messageLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 16),
             messageLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -16),
             
             // スクロールビュー（高さの制約を明示的に設定）
-            scrollView.topAnchor.constraint(equalTo: messageLabel.bottomAnchor, constant: 20),
+            // 2025.10.17, scrollView.topAnchor.constraintを20から16へ変更
+            scrollView.topAnchor.constraint(equalTo: messageLabel.bottomAnchor, constant: 16),
             scrollView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
             scrollView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
             scrollView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
@@ -157,10 +163,10 @@ class CustomAlertViewController: UIViewController {
         ])
         
         // containerViewの高さを計算して設定（タイトル + メッセージ + スクロール領域）
-        // 最大高さは画面の70%
-        let maxScrollHeight: CGFloat = 400
-        // let headerHeight: CGFloat = 20 + 8 + 20 // top padding + spacing + bottom padding
-        let maxContainerHeight = view.bounds.height * 0.7
+        // 最大高さは画面の70% → 2025.10.17, 最大高さは画面の90%, 600pixelへ変更
+        let maxScrollHeight: CGFloat = 600
+        // 2025.10.17, maxContainerHeightを0.85から0.9へ変更
+        let maxContainerHeight = view.bounds.height * 0.9
         
         // スクロールビューの高さを制限
         let scrollHeightConstraint = scrollView.heightAnchor.constraint(equalToConstant: maxScrollHeight)
@@ -195,58 +201,49 @@ class CustomAlertViewController: UIViewController {
     }
     
     private func createActionButton(for action: AlertAction, isLast: Bool) -> UIButton {
-        let button = UIButton(type: .system)
+        let button = UIButton(type: .custom) // customに変更
+        button.backgroundColor = action.style == .cancel ? UIColor.secondarySystemBackground : .clear
         
-        // iOS 15以降の新しい設定方法を使用
-        if #available(iOS 15.0, *) {
-            var config = UIButton.Configuration.plain()
-            config.title = action.title
-            config.baseForegroundColor = action.isEnabled ? .systemBlue : .systemGray
-            
-            if action.style == .cancel {
-                config.titleAlignment = .center
-                config.background.backgroundColor = UIColor.secondarySystemBackground
-            } else {
-                config.titleAlignment = .leading
-                config.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16)
-                config.background.backgroundColor = .clear
-            }
-            
-            // フォント設定
-            let font: UIFont = action.style == .cancel ?
-            UIFont.systemFont(ofSize: 17, weight: .semibold) :
-            UIFont.systemFont(ofSize: 17, weight: .regular)
-            config.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
-                var outgoing = incoming
-                outgoing.font = font
-                return outgoing
-            }
-            
-            button.configuration = config
+        // カスタムラベルを作成
+        let label = UILabel()
+        label.text = action.title
+        label.font = action.style == .cancel ?
+        UIFont.systemFont(ofSize: 17, weight: .semibold) :
+        UIFont.systemFont(ofSize: 17, weight: .regular)
+        label.textColor = action.isEnabled ? .systemBlue : .systemGray
+        
+        // 重要：テキストアライメント
+        if action.style == .cancel {
+            label.textAlignment = .center
         } else {
-            // iOS 15未満の古い方法（警告が出るが互換性のため）
-            button.setTitle(action.title, for: .normal)
-            
-            if action.style == .cancel {
-                button.contentHorizontalAlignment = .center
-                button.backgroundColor = UIColor.secondarySystemBackground
-            } else {
-                button.contentHorizontalAlignment = .left
-                button.contentEdgeInsets = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
-                button.backgroundColor = .clear
-            }
-            
-            button.titleLabel?.font = action.style == .cancel ?
-            UIFont.systemFont(ofSize: 17, weight: .semibold) :
-            UIFont.systemFont(ofSize: 17, weight: .regular)
-            
-            button.setTitleColor(action.isEnabled ? .systemBlue : .systemGray, for: .normal)
+            label.textAlignment = .left
+        }
+        
+        label.translatesAutoresizingMaskIntoConstraints = false
+        button.addSubview(label)
+        
+        // ラベルの制約
+        if action.style == .cancel {
+            // Cancelボタンは中央
+            NSLayoutConstraint.activate([
+                label.centerXAnchor.constraint(equalTo: button.centerXAnchor),
+                label.centerYAnchor.constraint(equalTo: button.centerYAnchor)
+            ])
+        } else {
+            // 通常ボタンは左寄せ（16pxの余白）
+            NSLayoutConstraint.activate([
+                label.leadingAnchor.constraint(equalTo: button.leadingAnchor, constant: 16),
+                label.trailingAnchor.constraint(equalTo: button.trailingAnchor, constant: -16),
+                label.centerYAnchor.constraint(equalTo: button.centerYAnchor)
+            ])
         }
         
         button.isEnabled = action.isEnabled
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.heightAnchor.constraint(equalToConstant: 44).isActive = true
+        // 2025.10.17, button.heightAnchor.constraintを44から40へ変更
+        button.heightAnchor.constraint(equalToConstant: 40).isActive = true
         
+        // 区切り線
         if !isLast {
             let separator = UIView()
             separator.backgroundColor = .separator
@@ -261,6 +258,7 @@ class CustomAlertViewController: UIViewController {
             ])
         }
         
+        // タップアクション
         button.addAction(UIAction { [weak self] _ in
             print("🔴 Button tapped: \(action.title)")
             self?.dismiss(animated: true) {
@@ -268,6 +266,23 @@ class CustomAlertViewController: UIViewController {
             }
         }, for: .touchUpInside)
         
+        // タップ時の視覚的フィードバック
+        button.addTarget(self, action: #selector(buttonTouchDown(_:)), for: .touchDown)
+        button.addTarget(self, action: #selector(buttonTouchUp(_:)), for: [.touchUpInside, .touchUpOutside, .touchCancel])
+        
         return button
+    }
+    
+    // タップ時のハイライト効果
+    @objc private func buttonTouchDown(_ sender: UIButton) {
+        UIView.animate(withDuration: 0.1) {
+            sender.alpha = 0.5
+        }
+    }
+    
+    @objc private func buttonTouchUp(_ sender: UIButton) {
+        UIView.animate(withDuration: 0.1) {
+            sender.alpha = 1.0
+        }
     }
 }
